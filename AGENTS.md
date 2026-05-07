@@ -1,27 +1,38 @@
-## RTK (Rust Token Killer)
+# Project Overview
 
-**CRITICAL: RTK saves 60-90% tokens on CLI commands.** Always use it.
+Clean Architecture example REST API using Express 5 and MikroORM with SQLite.
 
-`rtk` is a transparent proxy for CLI commands that hooks into existing tools. It intercepts calls to git, pnpm, npm, cargo, docker, and many more—routing them through a Rust proxy that eliminates redundant work and compresses output.
+## Architecture (src/)
 
-### Mandatory Usage
+- **domain/** — Entities (business objects). No framework dependencies. `src/domain/user.entity.ts`
+- **infrastructure/** — External concerns (DB config, repositories, external services). `src/infrastructure/mikro-orm.config.ts`
+- **presentation/** — HTTP layer (routes, controllers, middleware). Entry point: `src/presentation/index.ts`
 
-- **First choice**: Prefix ALL shell commands with `rtk` (git, pnpm, npm, cargo, docker, kubectl, etc.)
-- **No exceptions**: Even for trivial commands like `git status` or `pnpm install`—always try `rtk` first
-- **Fallback only**: If `rtk` is unavailable or a command fails, use the raw command directly
+Dependencies point inward: presentation → infrastructure → domain. Domain never imports from outer layers.
 
-### How It Works
+## Commands
 
-```
-rtk git status    →  git status (with token-efficient routing)
-rtk pnpm check    →  pnpm check (with output compression)
-rtk npm test      →  npm test (with reduced token overhead)
-```
+- Dev server: `rtk npm run dev`
+- Build: `rtk npm run build`
+- Lint: `rtk npm run lint`
+- Lint fix: `rtk npm run lint:fix`
+- Typecheck: `rtk npm run typecheck`
 
-### Utilities
+Always run `rtk npm run typecheck` and `rtk npm run lint` after changes.
 
-- `rtk gain` — Check your current token savings
-- `rtk discover` — Find commands where RTK isn't being used
-- `rtk --help` — See all available commands and options
+## Key Details
 
-See `RTK.md` for complete reference.
+- ESM project (`"type": "module"`) — use `.js` extensions in imports
+- TypeScript strict mode enabled
+- MikroORM with decorators (`emitDecoratorMetadata`, `experimentalDecorators`)
+- SQLite database stored at `./data/database.db`
+- Runs on port 3000
+
+## RTK
+
+Prefix ALL shell commands with `rtk`. Fallback to raw commands only if `rtk` fails.
+
+## Extended Docs
+
+Read these when relevant to your task:
+- `agent_docs/database_schema.md` — Entity definitions and ORM config details
